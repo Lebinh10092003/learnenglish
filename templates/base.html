@@ -90,7 +90,7 @@
                 {% else %}
                     <a href="{% url 'login' %}" class="nav-item nav-link">Học từ mới</a>
                 {% endif %}
-                <a href="#" class="nav-item nav-link {% if request.session.current_page == 'service' %}active{% endif %}">Ôn tập</a>
+                <a href="{% url 'chat_ai' %}" class="nav-item nav-link {% if request.session.current_page == 'chat_ai' %}active{% endif %}">Ôn tập với AI</a>
                 <a href="#" class="nav-item nav-link {% if request.session.current_page == 'project' %}active{% endif %}">Làm bài kiểm tra</a>
                                                          
                 <div class="nav-item dropdown">

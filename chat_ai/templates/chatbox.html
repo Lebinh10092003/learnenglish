@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/review.css' %}">
+
+<div class="container mt-4">
+    <div class="alert alert-info text-center">
+        Hãy trò chuyện với Chatbox bằng các từ vựng bạn đang học! Chatbox sẽ sửa lỗi ngữ pháp cho bạn.
+    </div>
+
+    <div class="chatbox-container card shadow-lg rounded" style="max-width: 600px; margin: auto;">
+        <div class="card-header bg-primary text-white text-center">
+            Chatbox
+        </div>
+        <div class="card-body chatbox-content" id="chatbox-content" style="height: 300px; overflow-y: auto; background-color: #f8f9fa;">
+            <!-- Tin nhắn sẽ hiển thị ở đây -->
+        </div>
+        <div class="card-footer bg-white border-top d-flex align-items-center p-2">
+            <input type="text" class="form-control me-2" id="user-input" placeholder="Nhập câu hỏi..." style="border-radius: 20px;">
+            <button class="btn btn-primary" id="send-btn">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('send-btn').addEventListener('click', function() {
+    let userInput = document.getElementById('user-input').value;
+    if (userInput.trim() !== '') {
+        let chatContent = document.getElementById('chatbox-content');
+
+        // Hiển thị tin nhắn của người dùng
+        let userMessage = `<div class='alert alert-primary' style='border-radius: 20px; max-width: 75%; margin: 5px 0; align-self: flex-end;'>${userInput}</div>`;
+        chatContent.innerHTML += userMessage;
+        document.getElementById('user-input').value = '';
+        chatContent.scrollTop = chatContent.scrollHeight;
+
+        // Gửi yêu cầu đến server Django
+        fetch("{% url 'chatbox_view' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: new URLSearchParams({
+                "user_input": userInput
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            let botMessage = `<div class='alert alert-secondary' style='border-radius: 20px; max-width: 75%; margin: 5px 0; align-self: flex-start;'>${data.bot_response}</div>`;
+            chatContent.innerHTML += botMessage;
+            chatContent.scrollTop = chatContent.scrollHeight;
+        })
+        .catch(error => console.error("Lỗi:", error));
+    }
+});
+</script>
+
+{% endblock %}
