@@ -125,9 +125,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
 # Thư mục nơi các file static sẽ được thu thập khi chạy lệnh collectstatic
 STATIC_ROOT = BASE_DIR / 'staticfiles'  # Ví dụ, sẽ thu thập các tệp ở đây
+
+
+MEDIA_URL = '/media/'  # Đường dẫn mà tệp media sẽ được truy cập
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

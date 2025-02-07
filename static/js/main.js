@@ -96,3 +96,13 @@
     
 })(jQuery);
 
+document.querySelectorAll('.nav-link').forEach(function(item) {
+    item.addEventListener('click', function() {
+        // Loại bỏ class 'active' khỏi tất cả các item
+        document.querySelectorAll('.nav-link').forEach(function(link) {
+            link.classList.remove('active');
+        });
+        // Thêm class 'active' vào item hiện tại
+        item.classList.add('active');
+    });
+});

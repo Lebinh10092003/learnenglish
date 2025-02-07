@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<!-- Thêm thư viện jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="{% static 'css/vocabulary.css' %}">
+<div class="container">
+    <audio id="correct-sound" src="{% static 'sound/correct.mp3' %}"></audio>
+    <audio id="wrong-sound" src="{% static 'sound/error.mp3' %}"></audio>
+    <audio id="click-sound" src="{% static 'sound/click.mp3' %}"></audio>
+
+    <h1>Tra từ vựng</h1>
+    <form id="wordForm">
+        <label for="word_prefix">Nhập từ bạn muốn tìm kiếm:</label>
+        <input type="text" id="word_prefix" name="word_prefix" placeholder="Nhập từ tìm kiếm..." required autocomplete="off">
+    </form>
+
+    <h2>Kết quả gợi ý từ:</h2>
+    <ul id="suggestionsList">
+        <!-- Các gợi ý từ sẽ được hiển thị ở đây -->
+    </ul>
+</div>
+
+<script>
+    // Lắng nghe sự kiện input vào ô tìm kiếm
+    $(document).ready(function() {
+        $('#word_prefix').on('change', function() {
+            var query = $(this).val();  // Lấy giá trị từ input
+
+            if (query.length > 1) {  // Chỉ tìm kiếm khi chuỗi có độ dài > 1 ký tự
+                $.ajax({
+                    url: '/vocabulary/search-suggestions/',  // Địa chỉ endpoint API của bạn
+                    data: { 'query': query },  // Truyền từ khóa tìm kiếm
+                    dataType: 'json',
+                    success: function(data) {
+                        console.log(data);  // Kiểm tra toàn bộ dữ liệu trả về từ server
+
+                        // Xóa hết kết quả cũ trong danh sách gợi ý
+                        $('#suggestionsList').empty();
+
+                        // Nếu có kết quả, hiển thị chúng
+                        if (data.suggestions && data.suggestions.length > 0) {
+                            data.suggestions.forEach(function(item) {
+                                var suggestionItem = $('<li></li>').html(
+                                    '<strong>' + item.word + '</strong><br>' +
+                                    'Loại từ: ' + (item.description || 'Chưa có') + '<br>' +
+                                    'Chi tiết: ' + (item.detail_description || 'Chưa có') + '<br>' +
+                                    '<em>Phiên âm: ' + (item.phonetic || 'Chưa có') + '</em><br>' +
+                                    'Ý nghĩa: ' + (item.meaning || 'Chưa có') + '<br>' +
+                                    (item.example ? 'Ví dụ: ' + item.example : 'Không có ví dụ') + '<br>' +
+                                    '<button class="audio-btn" onclick="playAudio(\'' + item.word + '\')">🔊</button>' +
+                                    '<button class="learn-word-btn" onclick="learnNewWord(\'' + item.word + '\')">Học từ này </button>'
+                                );
+                                $('#suggestionsList').append(suggestionItem);
+                            });
+                        } else {
+                            // Nếu không có kết quả nào, hiển thị thông báo
+                            $('#suggestionsList').append('<li>Không tìm thấy từ nào khớp.</li>');
+                        }
+                    },
+                    error: function() {
+                        $('#suggestionsList').empty().append('<li>Đã có lỗi xảy ra. Vui lòng thử lại.</li>');
+                    }
+                });
+            } else {
+                $('#suggestionsList').empty();  // Xóa gợi ý khi input trống
+            }
+        });
+    });
+
+    function playAudio(word) {
+        $.ajax({
+            url: '/vocabulary/read-text/',  // Đảm bảo URL này chính xác
+            data: { 'text': word },  // Gửi từ cần đọc tới server
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Có thể thêm hành động khi đọc thành công
+                } else {
+                    alert("Có lỗi khi đọc từ: " + word + ". Lỗi: " + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Có lỗi xảy ra khi yêu cầu đọc văn bản. Chi tiết lỗi: ' + error);
+            }
+        });
+    }
+
+    function learnNewWord(word) {
+        $.ajax({
+            url: '/vocabulary/add-to-learning/',  // API xử lý thêm từ vào danh sách học
+            type: 'POST',
+            data: JSON.stringify({ 'word': word }),  // Gửi word
+            contentType: 'application/json',
+            success: function(response) {
+                if (response.status === 'not_authenticated') {
+                    // Nếu chưa đăng nhập, hiển thị modal yêu cầu đăng nhập
+                    showLoginModal();
+                } else if (response.status === 'success') {
+                    // Nếu thêm từ thành công, hiển thị thông báo va chạy âm thanh
+                    document.getElementById('correct-sound').play();
+                    Swal.fire({
+                        title: 'Thành công!',
+                        text: `Đã thêm từ "${word}" vào danh sách học.`,
+                        icon: 'success',
+                        showConfirmButton: false,
+                        timer: 2000  // Tự động đóng sau 3 giây
+                    });
+                } else {
+                    // Nếu có lỗi, hiển thị thông báo lỗi và chạy âm thanh
+                    document.getElementById('error-sound').play();
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: response.message,
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    title: 'Lỗi kết nối!',
+                    text: 'Vui lòng kiểm tra kết nối và thử lại.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    }
+    
+    
+    // Hiển thị modal yêu cầu đăng nhập
+    function showLoginModal() {
+        let modalHTML = `
+            <div id="loginModal" class="modal fade-out">
+                <div class="modal-content">
+                    <h2>Bạn cần đăng nhập để sử dụng chức năng này!</h2>
+                    <button onclick="window.location.href='{% url 'login' %}'">Đăng nhập</button>
+                    <button onclick="closeModal()">Hủy</button>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHTML);
+        $('#loginModal').fadeIn().removeClass('fade-out').addClass('show');
+        $('.modal-content').addClass('show');
+    }
+
+    // Đóng modal
+    function closeModal() {
+        $('#loginModal').removeClass('show').addClass('fade-out').fadeOut(function() {
+            $(this).remove();
+        });
+    }
+
+    
+</script>
+
+
+{% endblock %}

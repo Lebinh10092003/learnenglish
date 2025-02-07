@@ -30,6 +30,8 @@
 
     <!-- Template Stylesheet -->
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body>
@@ -73,7 +75,7 @@
 
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top p-0">
-        <a href="index.html" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
+        <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center border-end px-4 px-lg-5">
             <h2 class="m-0 text-primary">Lê Bình</h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -81,24 +83,34 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
-                <a href="index.html" class="nav-item nav-link active">Trang chủ</a>
-                <a href="about.html" class="nav-item nav-link">Học từ mới</a>
-                <a href="service.html" class="nav-item nav-link">Ôn tập</a>
-                <a href="project.html" class="nav-item nav-link">Làm bài kiểm tra</a>
+                <a href="{% url 'home' %}" class="nav-item nav-link {% if request.session.current_page == 'home' %}active{% endif %}">Trang chủ</a>
+                <a href="{% url 'search_word' %}" class="nav-item nav-link {% if request.session.current_page == 'search_word' %}active{% endif %}">Tra từ vựng</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'learn_new_word' %}" class="nav-item nav-link {% if request.session.current_page == 'learn_new_word' %}active{% endif %}">Học từ mới</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-item nav-link">Học từ mới</a>
+                {% endif %}
+                <a href="#" class="nav-item nav-link {% if request.session.current_page == 'service' %}active{% endif %}">Ôn tập</a>
+                <a href="#" class="nav-item nav-link {% if request.session.current_page == 'project' %}active{% endif %}">Làm bài kiểm tra</a>
+                                                         
                 <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Chi tiết</a>
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Liên Hệ</a>
                     <div class="dropdown-menu bg-light m-0">
-                        <a href="feature.html" class="dropdown-item">Feature</a>
-                        <a href="quote.html" class="dropdown-item">Free Quote</a>
-                        <a href="team.html" class="dropdown-item">Our Team</a>
-                        <a href="testimonial.html" class="dropdown-item">Testimonial</a>
-                        <a href="404.html" class="dropdown-item">404 Page</a>
+                        <a href="https://www.facebook.com/lebinh.24082003/" class="dropdown-item"><i class="fa-brands fa-facebook"></i>Facebook</a>
+                        <a href="https://www.tiktok.com/@lebinh24082003" class="dropdown-item"><i class="fa-brands fa-tiktok"></i>Tiktok</a>
+                        <a href="https://github.com/Lebinh10092003" class="dropdown-item"><i class="fab fa-github"></i>Github</a>
                     </div>
                 </div>
-                <a href="contact.html" class="nav-item nav-link">Liên hệ</a>
             </div>
-            <a href="" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i style="margin-left: 10px;"  class="fa fa-solid fa-right-to-bracket"></i></a>
-            <a href="" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Đăng ký<i class="fa fa-arrow-right ms-3"></i></a>
+            {% if user.is_authenticated %}
+                <!-- Nội dung cho người dùng đã đăng nhập -->
+                <a href="#" class="nav-item nav-link">Chào {{user.username}}</a>
+                <a class="text-center" href="{% url 'logout' %}">Đăng xuất</a>
+            {% else %}
+                <!-- Nội dung cho người dùng chưa đăng nhập -->
+                <a href="{% url 'login' %}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i style="margin-left: 10px;"  class="fa fa-solid fa-right-to-bracket"></i></a>
+                <a href="{% url 'register' %}" class="btn btn-primary rounded-0 py-4 px-lg-5 d-none d-lg-block">Đăng ký<i class="fa fa-arrow-right ms-3"></i></a>    
+            {% endif %}
         </div>
     </nav>
     <!-- Navbar End -->
@@ -126,11 +138,11 @@
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-white mb-4">Truy cập nhanh</h5>
-                    <a class="btn btn-link" href="">Trang chủ</a>
-                    <a class="btn btn-link" href="">Học từ mới</a>
-                    <a class="btn btn-link" href="">Ôn tập</a>
-                    <a class="btn btn-link" href="">Làm bài kiểm tra</a>
-                    <a class="btn btn-link" href="">Chi tiết</a>
+                    <a class="btn btn-link" href="{% url 'home' %}">Trang chủ</a>
+                    <a class="btn btn-link" href="{% url 'search_word' %}">Tra từ vựng</a>
+                    <a class="btn btn-link" href="#">Ôn tập</a>
+                    <a class="btn btn-link" href="#">Làm bài kiểm tra</a>
+                    <a class="btn btn-link" href="#">Chi tiết</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h5 class="text-white mb-4">Dự án mới</h5>
@@ -187,6 +199,8 @@
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Thêm thư viện jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'lib/wow/wow.min.js' %}"></script>
     <script src="{% static 'lib/easing/easing.min.js' %}"></script>
     <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
@@ -194,7 +208,6 @@
     <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
     <script src="{% static 'lib/isotope/isotope.pkgd.min.js' %}"></script>
     <script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
-    
     <!-- Template Javascript -->
     <script src="{% static 'js/main.js' %}"></script>
 </body>

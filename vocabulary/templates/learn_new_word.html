@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/vocabulary.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div class="container mt-5">
+    <audio id="correct-sound" src="{% static 'sound/correct.mp3' %}"></audio>
+    <audio id="wrong-sound" src="{% static 'sound/error.mp3' %}"></audio>
+    <audio id="click-sound" src="{% static 'sound/click.mp3' %}"></audio>
+    
+    <div class="row">
+        <!-- Menu bên trái -->
+        <div class="col-md-3">
+            <h4>Chủ đề</h4>
+            <ul class="list-group" id="method-list-learning">
+                <li class="list-group-item active" onclick="showMethod('word-list', this)">Danh sách từ đang học</li>
+                <li class="list-group-item" onclick="showMethod('learned', this)">Danh sách từ đã học</li>
+                <li class="list-group-item" onclick="showMethod('create-new-word', this)">Thêm từ riêng</li>
+            </ul>
+            <h4>Phương pháp học</h4>
+            <ul class="list-group" id="method-list-methods">
+                <li class="list-group-item" onclick="showMethod('flashcard', this)">Flashcard</li>
+                <li class="list-group-item" onclick="showMethod('scramble', this)">Sắp xếp chữ cái</li>
+                <li class="list-group-item" onclick="showMethod('fill', this)">Điền từ còn thiếu</li>
+
+            </ul>
+        </div>
+
+        <!-- Nội dung bên phải -->
+        <div class="col-md-9">
+            <!-- Danh sách từ đang học -->
+            <div id="word-list-container" class="learning-method mt-3">
+                <h5>Danh sách từ đang học</h5>
+                <div class="list-group">
+                    {% for entry in user_vocabulary %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center" onclick="toggleWordDetails('word-{{ entry.vocabulary.id }}')">
+                            <span>
+                                <h5>{{ entry.vocabulary.word }}</h5> 
+                                {{ entry.vocabulary.meaning }}</span>
+                            <span class="badge badge-info">{{ entry.is_learned }}</span>
+                            <div class="btn-group ml-2">
+                                <a href="#" class="btn btn-primary btn-sm" onclick="markAsLearned({{ entry.id }})">Done</a>
+                                <a href="#" class="btn btn-danger btn-sm mx-1" onclick="deleteWord({{ entry.id }})">Delete</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Danh sách từ đã học -->
+            <div id="learned-container" class="learning-method mt-3" style="display: none;">
+                <h5>Danh sách từ đã học</h5>
+                <div class="list-group">
+                    {% for entry in learned_words %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center" onclick="toggleWordDetails('word-{{ entry.vocabulary.id }}')">
+                            <span>
+                                <h5>{{ entry.vocabulary.word }}</h5> 
+                                {{ entry.vocabulary.meaning }}</span>
+                            </span>
+                            <span class="badge badge-info">{{ entry.is_learned }}</span>
+                            <div class="btn-group ml-2">
+                                <a href="#" class="btn btn-warning btn-sm" onclick="markAsLearned({{ entry.id }})">Again</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div id="create-new-word-container" class="learning-method mt-3" style="display: none;">
+                <h5>Thêm từ riêng</h5>
+                
+                
+            </div>
+
+            <!-- Flashcard -->
+            <div id="flashcard-container" class="learning-method mt-3" style="display: none;">
+                <h5>Flashcard</h5>
+                <div class="card text-center shadow-lg">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary" id="flashcard-word" onclick="showMeaning()">Word</h5>
+                        <p class="card-text text-muted" id="flashcard-meaning" style="display: none;">Meaning</p>
+                    </div>
+                </div>
+                <button class="btn btn-success mt-3" onclick="fetchRandomWord('flashcard')">Next</button>
+            </div>
+
+            <!-- Sắp xếp chữ cái -->
+            <div id="scramble-container" class="learning-method mt-3" style="display: none;">
+                <h5>Sắp xếp các chữ cái</h5>
+                <div class="card p-3">
+                    <p>Nhập từ có các chữ cái bị xáo trộn:</p>
+                    <input type="text" id="scramble-input" class="form-control" placeholder="Nhập từ" autocomplete="off">
+                    <button class="btn btn-primary mt-2" onclick="checkScramble()">Kiểm tra</button>
+                </div>
+                <!-- Hiển thị từ đã xáo trộn và nghĩa -->
+                <div id="scramble-word-container" class="mt-2">
+                    <p><strong>Sắp xếp lại:</strong> <span id="scrambled-word" class="text-muted"></span></p>
+                    <p><strong>Nghĩa:</strong> <span id="scrambled-meaning" class="text-muted"></span></p>
+                </div>
+            </div>
+
+            <!-- Điền từ còn thiếu -->
+            <div id="fill-container" class="learning-method mt-3" style="display: none;">
+                <h5>Điền từ còn thiếu</h5>
+                <div class="card p-3">
+                    <p>Điền vào từ còn thiếu:</p>
+                    <input type="text" id="fill-input" class="form-control" placeholder="Nhập từ" autocomplete="off">
+                    <button class="btn btn-primary mt-2" onclick="checkFill()">Kiểm tra</button>
+                </div>
+                <!-- Hiển thị từ có khoảng trống và nghĩa -->
+                <div id="fill-word-container" class="mt-2">
+                    <p><strong>Điền từ còn thiếu:</strong> <span id="masked-word" class="text-muted"></span></p>
+                    <p><strong>Nghĩa:</strong> <span id="masked-meaning" class="text-muted"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showMethod(method, element) {
+    // Ẩn tất cả các phương pháp học và hiển thị phần tương ứng
+    document.querySelectorAll(".learning-method").forEach(el => el.style.display = "none");
+    document.getElementById(method + "-container").style.display = "block";
+
+    // Cập nhật lớp "active"
+    document.querySelectorAll("#method-list-learning .list-group-item").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll("#method-list-methods .list-group-item").forEach(el => el.classList.remove("active"));
+    element.classList.add("active");
+
+    // Danh sách phương pháp cần lấy từ mới
+    const methodsRequiringWords = ["flashcard", "scramble", "fill"];
+    
+    if (methodsRequiringWords.includes(method)) {
+        fetchRandomWord(method);
+    }
+}    
+// Đảm bảo "Danh sách từ đang học" được hiển thị mặc định
+document.addEventListener("DOMContentLoaded", function() {
+    showMethod('word-list', document.querySelector("#method-list-learning .list-group-item"));
+});
+
+function toggleWordDetails(wordId) {
+    const wordElement = document.getElementById(wordId);
+    const meaningElement = wordElement.querySelector('.card-text');
+
+    // Kiểm tra và ẩn/hiện nghĩa
+    if (meaningElement.style.display === "none") {
+        meaningElement.style.display = "block";  // Hiển thị nghĩa
+    } else {
+        meaningElement.style.display = "none";  // Ẩn nghĩa
+    }
+}
+
+// Đánh dấu từ đã học
+const randomWordUrl = "{% url 'random-word' %}";
+
+function showAlert(icon, title, text) {
+    Swal.fire({
+        icon: icon,
+        title: title,
+        text: text,
+        showConfirmButton: false,
+        timer: 2000
+    });
+}
+
+// Lấy từ mới từ API và xử lý các phương pháp học
+function fetchRandomWord(method) {
+    fetch(randomWordUrl)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Dữ liệu API trả về:", data);  // Debug dữ liệu API
+
+            // Kiểm tra nếu dữ liệu trả về hợp lệ
+            if (!data || !data.word) {
+                showAlert("error", "Lỗi!", "Dữ liệu API không hợp lệ.");
+                return;
+            }
+
+            // Cập nhật từ và nghĩa vào giao diện
+            const word = data.word;
+            const meaning = data.meaning || "Không có nghĩa.";
+
+            // Flashcard
+            document.getElementById("flashcard-word").innerText = word;
+            document.getElementById("flashcard-meaning").innerText = meaning;
+            document.getElementById("flashcard-meaning").style.display = "none";
+
+            // Sắp xếp chữ cái
+            let scrambledWord = shuffleWord(word);
+            document.getElementById("scramble-input").value = "";
+            document.getElementById("scramble-input").setAttribute("data-answer", word);
+            document.getElementById("scramble-word-container").querySelector("#scrambled-word").innerText = scrambledWord;
+            document.getElementById("scramble-word-container").querySelector("#scrambled-meaning").innerText = meaning;
+
+            // Điền từ còn thiếu
+            let missingWord = maskWord(word);
+            document.getElementById("fill-input").value = "";
+            document.getElementById("fill-input").setAttribute("data-answer", word);
+            document.getElementById("fill-word-container").querySelector("#masked-word").innerText = missingWord;
+            document.getElementById("fill-word-container").querySelector("#masked-meaning").innerText = meaning;
+
+            // Hiển thị phương pháp học tương ứng
+            document.querySelectorAll(".learning-method").forEach(el => el.style.display = "none");
+            document.getElementById(`${method}-container`).style.display = "block";
+        })
+        .catch(error => {
+            console.error('Lỗi khi lấy từ mới:', error);
+            showAlert("error", "Lỗi!", "Không thể lấy từ mới. Vui lòng thử lại!");
+        });
+}
+
+// Kiểm tra đáp án phương pháp "Sắp xếp chữ cái"
+function checkScramble() {
+    let correctAnswer = document.getElementById("scramble-input").getAttribute("data-answer");
+    checkAnswer("scramble-input", correctAnswer, "scramble");
+}
+
+// Kiểm tra đáp án phương pháp "Điền từ còn thiếu"
+function checkFill() {
+    let correctAnswer = document.getElementById("fill-input").getAttribute("data-answer");
+    checkAnswer("fill-input", correctAnswer, "fill");
+}
+
+
+// Kiểm tra đáp án chung
+function checkAnswer(inputId, correctAnswer, method) {
+    let userInput = document.getElementById(inputId).value.trim();
+    if (userInput.toLowerCase() === correctAnswer.toLowerCase()) {
+        showAlert("success", "Chính xác!", "Bạn đã trả lời đúng 🎉");
+        setTimeout(() => fetchRandomWord(method), 1500);
+        document.getElementById('correct-sound').play();
+    } else {
+        showAlert("error", "Sai rồi!", `Đáp án đúng là: ${correctAnswer}`);
+        document.getElementById('wrong-sound').play();
+    }
+}
+
+// Xáo trộn thứ tự chữ cái trong từ
+function shuffleWord(word) {
+    return word.split("").sort(() => Math.random() - 0.5).join("");
+}
+
+// Ẩn ngẫu nhiên một số ký tự trong từ
+function maskWord(word) {
+    let chars = word.split("");
+    let maskCount = Math.max(1, Math.floor(chars.length / 3));
+    for (let i = 0; i < maskCount; i++) {
+        let randIndex = Math.floor(Math.random() * chars.length);
+        chars[randIndex] = "_";
+    }
+    return chars.join("");
+}
+
+// Hiển thị nghĩa của từ trong Flashcard
+function showMeaning() {
+    var meaningElement = document.getElementById("flashcard-meaning");
+    if (meaningElement.style.display === "none") {
+        meaningElement.style.display = "block";  // Hiển thị nghĩa khi bấm vào từ
+    } else {
+        meaningElement.style.display = "none";  // Ẩn nghĩa khi bấm lại
+    }
+}
+
+const updateLearningStatusUrl = "{% url 'update-learning-status' 0 %}";
+function markAsLearned(wordId) {
+    let url = updateLearningStatusUrl.replace("0", wordId); // Thay số 0 bằng ID thật
+    $.ajax({
+        url: url, 
+        type: 'GET',
+        success: function(response) {
+            console.log("Cập nhật thành công", response);
+
+            // Cập nhật trực tiếp UI
+            let badge = $(`#word-${wordId} .badge`);
+            if (response.is_learned === "Learned") {
+                badge.text("Learned").removeClass("badge-info").addClass("badge-success");
+            } else {
+                badge.text("Learning").removeClass("badge-success").addClass("badge-info");
+            }
+
+            // Hiển thị thông báo thành công
+            showAlert('success', 'Cập nhật thành công', 'Trạng thái học của từ đã được cập nhật!');
+
+            // Tải lại toàn bộ danh sách từ đang học
+            $('#word-list-container').load(location.href + ' #word-list-container > *', function() {
+                // Sau khi tải lại, thêm các phần tử mới vào danh sách nếu cần
+                console.log("Danh sách từ đang học đã được tải lại.");
+                document.getElementById('correct-sound').play();
+            });
+            // Nếu trạng thái từ đã học, di chuyển từ này vào danh sách từ đã học
+            if (response.is_learned === "Learned") {
+                // Di chuyển từ này vào danh sách từ đã học
+                let learnedWord = $(`#word-${wordId}`).clone();
+                $('#learned-container .list-group').append(learnedWord);  // Thêm từ vào danh sách đã học
+
+                // Xóa từ khỏi danh sách từ đang học
+                $(`#word-${wordId}`).remove();
+            }
+
+
+            // Tải lại toàn bộ danh sách từ đã học
+            $('#learned-container').load(location.href + ' #learned-container > *', function() {
+                // Sau khi tải lại, thêm các phần tử mới vào danh sách nếu cần
+                console.log("Danh sách từ đã học đã được tải lại.");
+                document.getElementById('correct-sound').play();
+            });
+        },
+        error: function(xhr) {
+            console.error("Lỗi cập nhật:", xhr.responseText);
+
+            // Hiển thị thông báo lỗi
+            showAlert('error', 'Lỗi cập nhật', 'Đã có lỗi xảy ra khi cập nhật trạng thái học. Vui lòng thử lại!');
+            document.getElementById('error-sound').play();
+        }
+    });
+}
+
+const deleteWordUrl = "{% url 'delete-learning-word' 0 %}";
+
+function deleteWord(wordId) {
+    // Sử dụng SweetAlert2 để hiển thị hộp thoại xác nhận
+    Swal.fire({
+        title: 'Bạn có chắc chắn muốn xóa từ này không?',
+        text: "Hành động này không thể hoàn tác!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy'
+    }).then((result) => {
+        // Nếu người dùng nhấn "Xóa", thực hiện yêu cầu AJAX
+        if (result.isConfirmed) {
+            let url = deleteWordUrl.replace("0", wordId); // Thay số 0 bằng ID thật
+            $.ajax({
+                url: url, 
+                type: 'GET',
+                success: function(response) {
+                    console.log("Xóa thành công", response);
+
+                    // Xóa từ khỏi danh sách học
+                    $(`#word-${wordId}`).remove();
+
+                    // Hiển thị thông báo thành công
+                    showAlert('success', 'Xóa thành công', 'Từ đã được xóa khỏi danh sách học!');
+                    document.getElementById('correct-sound').play();
+
+                    // Nếu cần, có thể tải lại các phần tử danh sách
+                    $('#word-list-container').load(location.href + ' #word-list-container > *', function() {
+                        console.log("Danh sách từ đang học đã được tải lại.");
+                    });
+                },
+                error: function(xhr) {
+                    console.error("Lỗi xóa từ:", xhr.responseText);
+
+                    // Hiển thị thông báo lỗi
+                    showAlert('error', 'Lỗi xóa từ', 'Đã có lỗi xảy ra khi xóa từ. Vui lòng thử lại!');
+                    document.getElementById('error-sound').play();
+                }
+            });
+        } else {
+            console.log("Người dùng đã hủy hành động xóa.");
+        }
+    });
+}
+
+
+</script>
+{% endblock %}

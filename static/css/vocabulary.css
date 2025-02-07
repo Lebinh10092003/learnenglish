@@ -1,0 +1,351 @@
+/* Tiêu đề */
+h1 {
+    font-size: 36px;
+    color: #4CAF50;
+    text-align: center;
+    margin-bottom: 30px;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Form tìm kiếm */
+form {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+form label {
+    font-size: 18px;
+    color: #333;
+    font-family: 'Arial', sans-serif;
+}
+
+form input[type="text"] {
+    padding: 15px;
+    font-size: 18px;
+    width: 50%;
+    /* Đặt chiều rộng dễ dàng căn giữa */
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+form input[type="text"]:focus {
+    border-color: #4CAF50;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+}
+
+form button {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+form button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+/* Danh sách gợi ý từ */
+ul#suggestionsList {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 30px;
+    margin-left: 15%;
+    /* Căn lề trái 15% */
+    margin-right: 15%;
+    /* Căn lề phải 15% */
+    max-height: 400px;
+    /* Giới hạn chiều cao của danh sách */
+    overflow-y: auto;
+    /* Cho phép cuộn dọc nếu quá dài */
+}
+
+ul#suggestionsList li {
+    background-color: #ffffff;
+    padding: 20px;
+    /* Tăng padding để tạo khoảng cách thoáng */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    /* Tăng khoảng cách giữa các phần tử */
+    font-size: 18px;
+    line-height: 1.8;
+    font-family: 'Arial', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+ul#suggestionsList li:hover {
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+ul#suggestionsList li strong {
+    font-weight: bold;
+    color: #4CAF50;
+    /* Làm nổi bật từ tìm kiếm */
+}
+
+ul#suggestionsList li em {
+    font-style: italic;
+    color: #777;
+}
+
+ul#suggestionsList li .audio-btn {
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    padding: 12px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+ul#suggestionsList li .audio-btn:hover {
+    background-color: #ddd;
+    transform: scale(1.1);
+}
+
+ul#suggestionsList li .learn-word-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+ul#suggestionsList li .learn-word-btn:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+h2 {
+    font-size: 28px;
+    color: #333;
+    margin-top: 20px;
+    font-family: 'Arial', sans-serif;
+}
+
+
+/* Tối ưu hóa khoảng cách giữa các phần tử */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100%;
+    padding: 0 15px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.learn-word-btn {
+    background-color: #28a745;
+    /* Màu xanh lá */
+    color: white;
+    /* Màu chữ trắng */
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    /* Bo góc */
+    cursor: pointer;
+    margin-top: 10px;
+    margin-left: 30px;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.learn-word-btn:hover {
+    background-color: #218838;
+    /* Màu xanh lá đậm hơn khi hover */
+    transform: scale(1.05);
+    /* Hiệu ứng phóng to nhẹ khi hover */
+}
+
+.learn-word-btn:active {
+    transform: scale(0.95);
+    /* Nhấn xuống tạo cảm giác bấm */
+}
+
+/* CSS cho modal đăng nhập */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Nội dung modal */
+.modal-content {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    transform: scale(0.8);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Modal hiện lên */
+.modal-content.show {
+    transform: scale(1);
+}
+
+/* Tiêu đề trong modal */
+.modal-content h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Nút trong modal */
+.modal-content button {
+    padding: 12px 25px;
+    margin: 10px;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.modal-content button:first-child {
+    background-color: #007bff;
+    color: white;
+}
+
+.modal-content button:last-child {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Hover hiệu ứng cho các nút */
+.modal-content button:hover {
+    transform: translateY(-4px);
+}
+
+.modal-content button:first-child:hover {
+    background-color: #0056b3;
+}
+
+.modal-content button:last-child:hover {
+    background-color: #c82333;
+}
+
+/* Hiệu ứng khi đóng modal */
+.modal.fade-out {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-out;
+}
+
+/* Hiệu ứng khi mở modal */
+.modal-content {
+    animation: modalIn 0.4s ease-out forwards;
+}
+
+/* Hiệu ứng vào modal */
+@keyframes modalIn {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.list-group-item.active {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+}
+
+.list-group-item:hover {
+    cursor: pointer;
+}
+
+.list-group-item .btn-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.btn-group .btn {
+    margin: 0;
+}
+
+
+
+
+/* Learn new word */
+
+/* Flashcard container */
+#flashcard-container {
+    border: 1px solid #ddd;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: auto;
+}
+
+/* Thêm hiệu ứng cho từ khi người dùng di chuột */
+#flashcard-word {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+#flashcard-word:hover {
+    color: #007bff;  /* Màu sắc thay đổi khi di chuột */
+}
+
+/* Nghĩa sẽ ẩn đi lúc ban đầu */
+#flashcard-meaning {
+    font-size: 18px;
+    color: #555;
+    display: none;  /* Ẩn nghĩa */
+    margin-top: 10px;
+    font-style: italic;
+}
+
+
+

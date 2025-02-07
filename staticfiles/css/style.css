@@ -419,6 +419,27 @@
     z-index: 1;
 }
 
+#wordForm {
+    display: flex;
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    gap: 10px; /* Tạo khoảng cách giữa các phần tử */
+    padding: 20px;
+}
+
+#wordForm .col-auto {
+    display: flex;
+    align-items: center;
+}
+
+#wordForm input {
+    width: 250px; /* Điều chỉnh độ rộng input */
+}
+
+#wordForm button {
+    white-space: nowrap; /* Giữ văn bản trên một dòng */
+}
+
 .testimonial-carousel::after {
     position: absolute;
     content: "";
